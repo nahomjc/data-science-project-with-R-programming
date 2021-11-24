@@ -1,0 +1,257 @@
+@charset "UTF-8";
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,700;0,800;1,700;1,800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;1,400;1,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;1,400;1,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,400;0,600;1,400&display=swap');
+
+body {
+	font-family: 'Titillium Web', sans-serif;
+    font-size: 16px;
+    color: #111;
+}
+
+html {
+	max-width: 100%;
+	margin: 0 auto;
+}
+
+.centered {
+	text-align: center;
+	text-justify: inter-word;
+	text-align-last: center;
+}
+
+.header {
+  height: 64px;
+  width: 86% !important;
+  max-width: 1920px !important;
+  min-width: 1440px !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.bc-white { background-color: #FFFFFF; }
+
+
+/* THESE ARE STYLE OVERRIDES FROM GENERATED */
+.main-container {
+  width: 86% !important;
+  max-width: 1920px !important;
+  min-width: 1440px !important;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* ADD SPACE BETWEEN SECTIONS */
+.section h1 {
+	padding-top: 97px !important;
+    margin-top: -67px !important;
+}
+
+
+/* OVERRIDES TO STANDARD MARKDOWN TAGS */
+h1 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: 600;
+	font-size: 32px;
+}
+
+h2 {
+	font-family: 'JetBrains Mono', monospace;
+	font-weight: 500;
+	font-size: 24px;
+	margin-bottom: 20px;
+	
+}
+
+h3 {
+	font-family: 'Share Tech Mono', monospace;
+	font-weight: 400;
+	font-size: 18px;
+	text-transform: uppercase;
+	color: #666666;
+	margin-bottom: 25px;
+}
+
+h4 {
+	font-family: 'Share Tech Mono', monospace;
+	font-weight: 400;
+	font-size: 16px;
+	text-transform: uppercase;
+}
+
+/* STANDARD NARRATIVE TEXT */
+p {
+	font-family: 'Titillium Web', sans-serif;
+	font-weight: 400;
+	font-size: 24px;
+	line-height: 32px;
+	margin: 25px;
+	margin-left: 75px;
+	margin-right: 75px;
+	text-align: justify;
+	text-justify: inter-word;
+	text-align-last: left;
+}
+
+.activity p {
+	width: fit-content;
+	block-size: fit-content;
+	margin-left: 0px;
+	margin-bottom: 25px;
+	padding-top: 2px;
+	padding-left: 10px;
+	padding-right: 10px;
+	font-family: 'Share Tech Mono', monospace;
+	font-weight: 400;
+	font-size: 18px;
+	line-height: 24px;
+	text-transform: uppercase;
+	text-align: center;
+	text-justify: inter-word;
+	text-align-last: center;
+	background-color: #111111;
+	color: #FFFFFF;
+}
+
+/* HORIZONTAL RULE */
+hr {
+	height: 2px;
+}
+
+/* COLORS SPECIFIC TO INGEST */
+.btop {
+    border-top: 5px solid  #111111 !important;
+    z-index: 999;
+}
+
+.bbottom {
+    border-bottom: 5px solid  #111111;
+}
+
+/* HORIZONTAL RULE */
+hr {
+	border: 1px solid #111111;
+	color: #111111;
+	background-color: #111111;
+}
+
+.footer {
+	border-top: solid 4px #111111;
+}
+
+/* CUSTOM BLOCK QUOTE */
+blockquote{
+  max-width: 80%;
+  margin: 25px auto;
+  font-family: 'Arvo', serif;
+  font-style: italic;
+  font-size: 24px;
+  color: #222222;
+  padding: 5px 10px 15px 30px;
+  border-left: 8px solid #222222 ;
+  line-height: 28px;
+  position: relative;
+  background: #F9F9F9;
+}
+
+blockquote::before{
+  font-family:Arial;
+  content: "\201C";
+  color:#222222;
+  font-size:64px;
+  position: absolute;
+  left: 10px;
+  top:20px;
+}
+
+blockquote::after{
+  content: '';
+}
+
+blockquote span{
+  display:block;
+  color:#222222;
+  font-style: normal;
+  font-weight: bold;
+  margin-top:0px;
+}
+
+/* CUSTOM LISTS */
+ul {
+  list-style-type: "→ ";
+  list-style-position: inside;
+  font-family: 'Titillium Web', sans-serif;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 32px;
+  margin: 25px;
+  margin-left: 100px;
+  text-align: justify;
+  text-justify: inter-word;
+  text-align-last: left;
+}
+
+p img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
+
+img {
+  max-width:100%;
+  margin: 0 auto;
+}
+
+.tabbed-pane {
+  padding-top: 12px;
+}
+
+.html-widget {
+  margin-bottom: 20px;
+}
+
+button.code-folding-btn:focus {
+  outline: none;
+}
+
+summary {
+  display: list-item;
+}
+
+/* Citations */
+pre code {
+  padding: 0;
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 400;
+  font-size: 14px;
+}
+
+/* CUSTOM SCROLLBAR */
+body::-webkit-scrollbar {
+  width: 12px;
+}
+
+body::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background: #333333;
+}
+
+body::-webkit-scrollbar-thumb:active {
+  background: #111111;
+}

@@ -1,0 +1,638 @@
+---
+pagetitle: "Deaths from illegal drugs use"
+author: "Nahom Tesfaye"
+date: "Date"
+output: 
+  html_document:
+    theme: lumen
+    css: ["styles/kamino.css"]
+    df_print: paged
+    mathjax: NULL
+    code_folding: show
+    include:
+    in_header: "styles/header1.html"
+    self_contained: true
+    lib_dir: libs
+---
+    
+    
+    
+
+---
+### kamino final project
+
+## ***Deaths Caused By Illegal Drug use in East Africa***. 
+
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide', out.width = "20%",fig.width=5, fig.height=5,  fig.align = 'left', fig.cap=""}
+
+knitr::include_graphics("assets/nt2.png", dpi=00)
+masthead <- "assets/nt2.png"
+
+```
+#### ***Author: Nahom Tesfaye***
+***
+```{r setup, include=FALSE}
+library(htmltools) # needed to include html snippets
+library(tidyverse)
+library(gridExtra)
+library(knitcitations)
+library(bibtex)
+library(ggiraph)
+
+library(ggplot2)
+library(ggthemes)
+library(treemapify)
+library(RColorBrewer)
+library(viridis)
+library(ggsci)
+library(wesanderson)
+library(devtools)
+library(sunburstR)
+library(kableExtra)
+library(circlize)
+library(d3r)
+
+library(showtext)
+
+library(scales)
+library(lubridate)
+
+
+
+library(ggrepel)
+library(plotrix)
+library(sf)
+library(sp)
+library(geojsonio)
+
+
+
+```
+
+
+
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide', out.width = "100%"}
+
+## Loading Google fonts (https://fonts.google.com/)
+font_add_google("Inconsolata", "inconsolata")
+# turn on showtext
+showtext_auto()
+
+```
+
+
+ 
+## Task 1: INGEST
+
+### Number of deaths from illicit drugs, World wide from 1990- 2017
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+
+df<-read.csv('hw/drug overdoses.csv')#(World Data For Death Caused By Drug Over Dose)
+
+
+df_1<-df
+df_1$Deaths.Opioid<-format(round(df_1$Deaths.Opioid,0), nsmall=0)
+df_1$Deaths.Cocaine<-format(round(df_1$Deaths.Cocaine,0), nsmall=0)
+df_1$Deaths.other.drug<-format(round(df_1$Deaths.other.drug,0), nsmall=0)
+df_1$Deaths.Amphetamine<-format(round(df_1$Deaths.Amphetamine,0), nsmall=0)
+df_1
+
+
+
+```
+***
+## Task 2: WRANGLE
+
+### Total deaths from illicit drugs in East Africa from 1990-2017
+
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+df_2<-df
+df_2<-df_2%>%select(Entity,Deaths.Opioid,Deaths.Cocaine,Deaths.other.drug,Deaths.Amphetamine)%>%rename(Country='Entity')
+df_2<-df_2%>%arrange(Country)%>%filter((Country=="Mauritius") | (Country=="Uganda") | (Country=="Rwanda")| (Country=="Kenya")| (Country=="Ethiopia")| (Country=="Tanzania")| (Country=="Eritrea")| (Country=="Madagascar")| (Country=="Somalia")| (Country=="Djibouti"))
+#%>%select(Country,`Deaths.Opioid`, `Deaths.Cocaine`,`Deaths.other.drug`,`Deaths.Amphetamine`)
+
+
+
+df_11<-df_2
+df_11$Deaths.Opioid<-format(round(df_11$Deaths.Opioid,0), nsmall=0)
+df_11$Deaths.Cocaine<-format(round(df_11$Deaths.Cocaine,0), nsmall=0)
+df_11$Deaths.other.drug<-format(round(df_11$Deaths.other.drug,0), nsmall=0)
+df_11$Deaths.Amphetamine<-format(round(df_11$Deaths.Amphetamine,0), nsmall=0)
+df_11
+
+
+
+
+```
+### CHECKING MISSING VALUES
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+missing_stats <- purrr::map_df(df_2, ~ sum(is.na(.))) %>%
+  gather('Column name', 'Count of missing values')
+
+missing_stats
+
+```
+***
+## Task 3: ANALYTICS
+
+#### Using Cluster method to identify which East African Countries have the highest death rate from illicit drug overdose \ 
+### -
+### SCALE NUMERIC COLUMNS
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+df_scaled<-df_2
+df_scaled[,2:5] <- scale(df_2[,2:5])
+df_scaled
+# enter your code here
+
+```
+### Using Elbow Method to find the ideal number of clusters
+
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+if(!require(devtools)) install.packages("devtools")
+#devtools::install_github("kassambara/factoextra")
+
+library(factoextra)
+### Elbow method (look at the knee)
+
+v1<-fviz_nbclust(df_scaled[,2:5], kmeans, method = "wss") +
+geom_vline(xintercept = 3, linetype = 2)
+girafe(ggobj = v1, width_svg = 13, height_svg = 7,
+       options = list(opts_sizing(rescale = TRUE, width = 1.0)))
+```
+### cumulative total
+
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+df_2<-df
+df_2<-df_2%>%select(Entity,Deaths.Opioid,Deaths.Cocaine,Deaths.other.drug,Deaths.Amphetamine)%>%rename(Country='Entity')
+df_2<-df_2%>%arrange(Country)%>%filter((Country=="Mauritius") | (Country=="Uganda") | (Country=="Rwanda")| (Country=="Kenya")| (Country=="Ethiopia")| (Country=="Tanzania")| (Country=="Eritrea")| (Country=="Madagascar")| (Country=="Somalia")| (Country=="Djibouti"))
+#%>%select(Country,`Deaths.Opioid`, `Deaths.Cocaine`,`Deaths.other.drug`,`Deaths.Amphetamine`)
+
+df_2 <- df_2 %>% 
+  group_by(`Country`,) %>% 
+  summarise(Deaths.Opioid=sum(`Deaths.Opioid`),Deaths.Cocaine = sum(`Deaths.Cocaine`),Deaths.other.drug = sum(`Deaths.other.drug`),Deaths.Amphetamine=sum(`Deaths.Amphetamine`))
+
+df_scaled<-df_2
+df_scaled[,2:5] <- scale(df_2[,2:5])
+
+df_scaled
+```
+### Clustering East african Countries
+
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+library(stats)
+
+set.seed(123)
+clusters <- kmeans(df_scaled[,2:5], 3, iter.max = 20, nstart = 25)
+
+
+df_2$cluster <- as.factor(clusters$cluster)
+
+df_2
+# enter your code here
+
+```
+### Ploting the clusters
+
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+v2 <- fviz_cluster(clusters, geom="point", data=df_2[,2:5],palette = "Set2") + 
+  ggtitle("K=3") + 
+  theme_minimal()
+girafe(ggobj = v2, width_svg = 13, height_svg = 7,
+       options = list(opts_sizing(rescale = TRUE, width = 1.0)))
+```
+
+
+### mean_Cases - cumulative total
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+mean_data <-df_2 %>%
+    group_by(cluster)%>%
+    summarise(n = n(),
+        Deaths.Opioid = mean(Deaths.Opioid),
+        Deaths.Cocaine = mean(Deaths.Cocaine),
+        Deaths.other.drug = mean(Deaths.other.drug),
+        Deaths.Amphetamine = mean( Deaths.Amphetamine))
+        
+
+mean_data
+```
+### Countries like Ethiopia and Tanzania Needs Attention From WHO.
+### -
+### the number one cause of drug overdose is found to be opioid
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+df_group3<-df_2%>%filter(cluster==1)
+df_group3
+```
+***
+
+## Task 4: VIEWS
+
+
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+df_3<-df
+df_3<-df_3%>%arrange(Year)%>%rename(Country='Entity')
+df_3<-df_3%>%arrange(Country)%>% filter((Country=="Mauritius") | (Country=="Uganda") | (Country=="Rwanda")| (Country=="Kenya")| (Country=="Ethiopia")| (Country=="Tanzania")| (Country=="Eritrea")| (Country=="Madagascar")| (Country=="Somalia")| (Country=="Djibouti"))
+
+df_3 <- df_3 %>% 
+  group_by(`Country`,`Year`) %>% 
+  summarise(Deaths.Opioid=sum(`Deaths.Opioid`),Deaths.Cocaine = sum(`Deaths.Cocaine`),Deaths.other.drug = sum(`Deaths.other.drug`),Deaths.Amphetamine=sum(`Deaths.Amphetamine`))
+
+
+
+
+#%>%select(Country,`Deaths.Opioid`, `Deaths.Cocaine`,`Deaths.other.drug`,`Deaths.Amphetamine`)
+
+```
+
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+df_33 <- df_3 %>% 
+  group_by(`Country`) %>% 
+  summarise(Deaths.Opioid=sum(`Deaths.Opioid`),Deaths.Cocaine = sum(`Deaths.Cocaine`),Deaths.other.drug = sum(`Deaths.other.drug`),Deaths.Amphetamine=sum(`Deaths.Amphetamine`))
+
+df_5<-df_33
+df_5$Deaths.Opioid<-format(round(df_5$Deaths.Opioid,0), nsmall=0)
+df_5$Deaths.Cocaine<-format(round(df_5$Deaths.Cocaine,0), nsmall=0)
+df_5$Deaths.other.drug<-format(round(df_5$Deaths.other.drug,0), nsmall=0)
+df_5$Deaths.Amphetamine<-format(round(df_5$Deaths.Amphetamine,0), nsmall=0)
+
+df_5
+```
+
+## Creating a visual representation that conveys some insight to my analysis.
+### -
+
+
+
+
+### Total Deaths caused by Opioid in East Africa
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+library(treemapify)
+library(ggiraph)
+
+v2 <- ggplot(df_33, aes(area = Deaths.Opioid, fill = Deaths.Opioid,  label = Country)) +ggtitle("Deaths caused by Opioid") +
+  geom_treemap() +
+  geom_treemap_text(fontface = "italic", colour = "white", place = "centre",
+                    grow = TRUE)
+
+girafe(ggobj = v2, width_svg = 16, height_svg = 10,
+  options = list(
+    opts_sizing(rescale = TRUE, width = 0.8) )
+)
+
+```
+
+### Total Deaths caused by Cocaine in East Africa
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide', fig.width=7, fig.height=7, out.width = "100%"}
+theme_opts <- theme(
+    plot.margin = margin(.25, 1, .25, .25, "cm"),
+    plot.background = element_blank(),
+    panel.background = element_blank(),
+    legend.position = "none",
+    axis.title.x=element_blank(),
+    axis.title.y=element_blank(),
+    axis.ticks.y=element_blank(),
+    axis.ticks.x=element_blank(),
+    axis.text.x=element_blank(),
+    strip.placement = "outside",                      # Place facet labels outside x axis labels.
+    strip.background = element_rect(fill = "white"),  # Make facet label background white.
+    axis.title = element_blank()                     # Remove x and y axis titles.
+)
+
+# Make the plot
+v1 <- ggplot(df_3, aes(x=Deaths.Cocaine, y=Country)) + 
+  geom_bar(stat="identity", fill="#88b88a") +
+   geom_text( data = df_33, size = 4, label = df_5$Deaths.Cocaine, hjust = 0, position = position_nudge(x = 12), color = 'gray30') +
+
+  # scale_y_discrete(limits=c("Almond milk", "Oat milk", "Soy milk", "Rice milk","Cow's milk")) +
+  #scale_fill_manual(values=c("Carbon Emissions (kg CO2eq)" = "#364e5d", "Land Use (m2)" = "#597e4e", "Water Use (L)" = "#587f89")) +
+  #scale_color_manual(values=c("white" = "#ffffff", "black" = "#000000")) +
+  coord_cartesian(clip="off") +
+  labs(title = "total Death caused by cocaine in East Africa") +
+  theme_opts
+
+# Print the plot
+v1
+```
+
+### Total Deaths caused by Amphetamine in East Africa
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide', fig.width=7, fig.height=7, out.width = "100%"}
+theme_opts <- theme(
+    plot.margin = margin(.25, 1, .25, .25, "cm"),
+    plot.background = element_blank(),
+    panel.background = element_blank(),
+    legend.position = "none",
+    axis.title.x=element_blank(),
+    axis.title.y=element_blank(),
+    axis.ticks.y=element_blank(),
+    axis.ticks.x=element_blank(),
+    axis.text.x=element_blank(),
+    strip.placement = "outside",                      # Place facet labels outside x axis labels.
+    strip.background = element_rect(fill = "white"),  # Make facet label background white.
+    axis.title = element_blank()                     # Remove x and y axis titles.
+)
+
+# Make the plot
+v1 <- ggplot(df_3, aes(x=Deaths.Amphetamine, y=Country)) + 
+  geom_bar(stat="identity", fill="#0000FF") +
+   geom_text( data = df_33, size = 4, label = df_5$Deaths.Amphetamine, hjust = 0, position = position_nudge(x = 12), color = 'blue') +
+
+  # scale_y_discrete(limits=c("Almond milk", "Oat milk", "Soy milk", "Rice milk","Cow's milk")) +
+  #scale_fill_manual(values=c("Carbon Emissions (kg CO2eq)" = "#364e5d", "Land Use (m2)" = "#597e4e", "Water Use (L)" = "#587f89")) +
+  #scale_color_manual(values=c("white" = "#ffffff", "black" = "#000000")) +
+  coord_cartesian(clip="off") +
+  labs(title = "total Death caused by Amphetaminecocaine in East Africa") +
+  theme_opts
+
+# Print the plot
+v1
+
+```
+
+### Total Deaths caused by other Drugs in East Africa
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide', fig.width=7, fig.height=7, out.width = "100%"}
+
+theme_opts <- theme(
+    plot.margin = margin(.25, 1, .25, .25, "cm"),
+    plot.background = element_blank(),
+    panel.background = element_blank(),
+    legend.position = "none",
+    axis.title.x=element_blank(),
+    axis.title.y=element_blank(),
+    axis.ticks.y=element_blank(),
+    axis.ticks.x=element_blank(),
+    axis.text.x=element_blank(),
+    strip.placement = "outside",                      # Place facet labels outside x axis labels.
+    strip.background = element_rect(fill = "white"),  # Make facet label background white.
+    axis.title = element_blank()                     # Remove x and y axis titles.
+)
+
+# Make the plot
+v1 <- ggplot(df_3, aes(x=Deaths.other.drug, y=Country)) + 
+  geom_bar(stat="identity", fill="#FFFF00") +
+   geom_text( data = df_33, size = 4, label = df_5$Deaths.other.drug, hjust = 0, position = position_nudge(x = 12), color = 'yellow') +
+
+  # scale_y_discrete(limits=c("Almond milk", "Oat milk", "Soy milk", "Rice milk","Cow's milk")) +
+  #scale_fill_manual(values=c("Carbon Emissions (kg CO2eq)" = "#364e5d", "Land Use (m2)" = "#597e4e", "Water Use (L)" = "#587f89")) +
+  #scale_color_manual(values=c("white" = "#ffffff", "black" = "#000000")) +
+  coord_cartesian(clip="off") +
+  labs(title = "total Death caused by other Drugs in East Africa") +
+  theme_opts
+
+# Print the plot
+v1
+```
+
+## Task 5: STORYTELLING
+## -
+# Drug overdoes effect on East Africa
+
+
+## __Objective__: identifying a country that has the highest drug overdose death rate in East african. \
+ 
+   
+### __First let us identify and list illicit drugs that are responsible for the death of many in East Africa.__ \
+* opioid use disorder(OUD)
+* Cocaine
+* Amphetamine
+* other.drugs
+
+
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide', out.width = "60%", fig.align = 'center', fig.cap=""}
+
+knitr::include_graphics("assets/drug-OD1.Jpg", dpi=00)
+masthead <- "assets/drug-OD1.Jpg"
+
+```
+> Drugs take you to hell, disguised as heaven.\
+--- Donald Lyn 
+
+***
+#### Out of all the illicit drugs, opioid use disorder(OUD) is the number one cause of death in east Africa, for this matter opioid deserves our attention.
+### mean_Cases - cumulative total
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+mean_data <-df_2 %>%
+    group_by(cluster)%>%
+    summarise(n = n(),
+        Deaths.Opioid = mean(Deaths.Opioid),
+        Deaths.Cocaine = mean(Deaths.Cocaine),
+        Deaths.other.drug = mean(Deaths.other.drug),
+        Deaths.Amphetamine = mean( Deaths.Amphetamine))
+        
+
+mean_data
+```
+
+### __How do people misuse prescription opioids?__ \
+
+#### Prescription opioids used for pain relief are generally safe when taken for a short time and as prescribed by a doctor, but they can be misused. People misuse prescription opioids by:
+
++ taking the medicine in a way or dose other than prescribed
++ taking someone else's prescription medicine
++ taking the medicine for the effect it causes-to get high
+    
+
+#### When misusing a prescription opioid, a person can swallow the medicine in its normal form. Sometimes people crush pills or open capsules, dissolve the powder in water, and inject the liquid into a vein. Some also snort the powder, pluse the misuse of Opioid has given birth to Heroin.
+
+>Heroin is an opioid drug made from morphine, a natural substance taken from the seed pod of the various opium poppy plants grown in Southeast.\
+--- National Institute on Drug Abuse
+
+#### Opioid use disorde(OUD) occurs in sub-Saharan Africa, with attendant clinical and social costs. Evidence-based policies and health system resources are       needed to promote OUD prevention and management From WHO and other health organization. 
+
+## Number of Deaths Opiod by percent
+#### Though the Government of Ethiopia has adopted a national drug control master plan, it has a lot to do to prevent the growth of death rate,
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+df_deaths <- df_33 %>% select(Country, Deaths.Opioid)
+
+#remove effects where deaths is NA
+df_deaths <- df_deaths[!is.na(df_deaths$Deaths.Opioid), ]
+
+# creating a percentage column
+df_deaths <- mutate(df_deaths, Percent=round(100*df_deaths$Deaths.Opioid/sum(df_deaths$Deaths.Opioid)))
+df_deaths <- df_deaths %>% filter(df_deaths$Percent > 2)
+
+#df_deaths
+```
+
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+df_deathsx<-df_deaths
+df_deathsx$Deaths.Opioid<-format(round(df_deathsx$Deaths.Opioid), nsmall=0)
+df_deathsx
+```
+## Number of Deaths in East africa per Opioid death \
+### Ethiopia scorded the highst death rate in East africa. 
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide', fig.width=7, fig.height=7, out.width = "100%"}
+theme_opts <- theme_minimal() + theme(
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.ticks = element_line(),
+    panel.background = element_rect(fill = "white", colour = "white"), 
+    legend.position = "right"
+)
+
+area <- ggplot(df_deaths, aes(x="", y= Deaths.Opioid, fill= Country)) +
+        geom_col(color="black")+
+        geom_text_repel(aes(label = paste(df_deathsx$Deaths.Opioid,"-",df_deaths$Percent,"%")),
+             color = "white",       
+             position = position_stack(vjust = 0.5),
+            show.legend = FALSE) +
+       coord_polar(theta = "y")+
+        labs(title = "Number of Deaths per Opioid death", subtitle = "Preliminary Analysis") +
+        theme_minimal() +
+        theme_opts
+
+area
+ggsave(filename = "assets/ethiopia-disaster-deaths.svg", plot = area, width=13, height=4)
+```
+
+
+
+## Number of death over the Years in Ethiopia
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+df_7<-df
+df_7<-df_7%>%arrange(Year)%>%rename(Country='Entity')
+df_7<-df_7%>%arrange(Country)%>% filter( (Country=="Ethiopia"))
+
+df_7$Deaths.Opioid<-format(round(df_7$Deaths.Opioid), nsmall=0)
+
+
+#Wrangling data
+df_7 <- df_7 %>% select(Year,Deaths.Opioid)
+
+df_8<-df_7
+df_8 <- transform(df_7,Deaths.Opioid = as.numeric(Deaths.Opioid))
+df_8
+
+#fit simple linear regression model
+#model <- lm(df_temp$Deaths~df_temp$Year)
+
+#view model summary
+#summary(model)
+
+#Call:
+#lm(formula = df_temp$Deaths~df_temp$Year)
+
+#From the model we see, Deaths=(-6325.840) + 3.303*(f_temp$Year)
+
+
+```
+
+
+
+
+
+
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide', fig.width=7, fig.height=7, out.width = "100%"}
+theme_opts <- theme(
+    plot.title = element_text(color = "black", size = 12, face = "bold"),
+    plot.subtitle = element_text(color = "black", size = 8),
+    plot.caption = element_text(color = "#555555", size = 8),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    # axis.text.x = element_text(vjust = 12),
+    panel.border = element_blank(),
+    panel.background = element_blank(),
+    panel.grid.minor = element_blank(), # remove minor gridlines
+    panel.grid.major.x = element_blank(), # remove x (vertical) gridlines
+    legend.title = element_blank(), # remove legend title
+    legend.text = element_text(color = "black", size = 8),
+    legend.position='top'
+  )
+
+
+# Plot
+v1 <- ggplot(df_8, aes(x=Year, y=Deaths.Opioid)) + 
+          geom_line(aes(y=Deaths.Opioid), color="blue") +
+         
+  geom_area(color = "#458cb6", fill= "#a1b5d2", alpha=1.0 , size=0.5) +
+   #geom_hline(yintercept = c(seq(0, 100, 10)), color="#ffffff", size=0.25, alpha=0.2) + # gridlines in the forefront
+ scale_x_continuous(breaks=c(1990,1993,1996,1999,2002,2005,2007,2010,2013,2016,2019)) +
+  scale_y_continuous(breaks=seq(0, 300, 10)) +
+  labs( title = "opioid data for Ethiopia!",
+        subtitle = "total death of opioid from 1990 to 2017") +
+  theme_bw() +
+  
+           annotate("text", x = 1997, y = 110, 
+             label = paste0("In 1997 - the highest peak", "\n", "Deaths Number = 110"), 
+             hjust = "left", vjust = 0, color = "#000000", size = 4, fontface = 1) +
+  
+           annotate("text", x = 2016, y = 97, 
+             label = paste0(" 2017 peak", "\n", "Deaths=97"), 
+             hjust = "left", vjust = 0, color = "#000000", size = 4, fontface = 1) +
+  theme_opts
+
+v1
+```
+
+*** 
+# ANALYTICS PART 2
+## using Time serious to see ethiopian Opioid death rate in Time
+
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+df_22<-df
+df_22<-df_22%>%select(Entity,Year,Deaths.Opioid)%>%rename(Country='Entity')
+ 
+df_22<-df_22%>%arrange(Country)%>%filter( (Country=="Ethiopia"))
+#%>%select(Country,`Deaths.Opioid`, `Deaths.Cocaine`,`Deaths.other.drug`,`Deaths.Amphetamine`)
+
+df_22 <- df_22 %>% 
+  group_by(`Year`,) %>% 
+  summarise(Deaths.Opioid=sum(`Deaths.Opioid`))
+
+mean_data1 <-df_22%>%
+  rename(Deaths.Opioid.mean='Deaths.Opioid') %>%
+    group_by(Year)%>%
+    summarise(
+        Deaths.Opioid.mean = mean(Deaths.Opioid.mean))
+        
+
+mean_data1
+```
+
+#### Changing “year” to a date, and saving date as a new column called “date_char
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+df_23 <-mean_data1 %>% 
+select(date=Year,Deaths.Opioid.mean)%>%
+arrange(date)
+df_23$date <- as.Date(mean_data1$Year,"1901-01-01")
+
+ 
+df_23
+```
+### Calculate Moving Average
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+library(TTR)
+df_24 <- df_23%>%mutate(MA=ALMA(Deaths.Opioid.mean, n = 9, offset = 0.85, sigma = 6))
+
+df_24
+```
+### Visualizing the two variables onto one graph
+```{r, message=FALSE, warning=FALSE, echo=TRUE, class.source = 'fold-hide'}
+ggplot(data=df_24, aes(x=date)) +
+geom_line(mapping=aes(y=MA, color="MA"),group = 1,size=1)+
+geom_line(mapping=aes(y=Deaths.Opioid.mean, color="mean_Deaths.Opioid"),group = 1,size=1)+
+  theme(panel.grid = element_blank(), 
+        axis.ticks = element_blank(), 
+        strip.background = element_blank(),
+        panel.background = element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank()) +
+  scale_color_manual(values = c(Deaths.Opioid.mean="black",
+                                MA="red"))
+
+```
+# References
+## The citations and data sources used for this case
+
+* [Global Burden of Disease Collaborative Network) Dashboard](	http://ghdx.healthdata.org/gbd-results-tool)
+* [K-means Cluster Analysis](https://afit-r.github.io/kmeans_clustering)
+* [ourworldindata](https://ourworldindata.org)
+* [National Institute on Drug Abuse](https://www.drugabuse.gov/publications/drugfacts/prescription-opioids)
+
+
+## Task 6: PACKAGE
+
+* Knitr your project to an html page.
+* Provide the source data, the .Rmd and .html documents as a compressed package.
+
+
